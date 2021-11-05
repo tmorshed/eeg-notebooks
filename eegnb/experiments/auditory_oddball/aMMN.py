@@ -3,14 +3,24 @@ from time import time, sleep
 from glob import glob
 from random import choice
 from optparse import OptionParser
-
 import numpy as np
 from pandas import DataFrame
-from psychopy import visual, core, event, sound
-
+from psychopy import visual, core, event, sound, prefs, logging
+import h5py
+import socket
+import json
 from eegnb import generate_save_fn
 
+prefs.resetPrefs()
+prefs.hardware['audioDriver'] = ["portaudio"]
 
+logging.console.setLevel(logging.CRITICAL)
+
+def sendpack(data_to_send):
+    event_to_send = json.dumps(data_to_send).encode("utf-8")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.sendto(event_to_send, ("239.128.35.86", 7891))
+    
 def present(
     save_fn: str = None,
     duration=120,
@@ -20,6 +30,7 @@ def present(
     secs=0.07,
     volume=0.8,
     eeg=None,
+    kernel=None
 ):
     markernames = [1, 2]
     record_duration = np.float32(duration)
@@ -55,9 +66,22 @@ def present(
 
     show_instructions(10)
 
-    # Start EEG Stream, wait for signal to settle, and then pull timestamp for start point
+    # Start EEG Stream, wait for signal to settle, and then pull 
+    for start point
     start = time()
-
+    
+    if kernel:
+        timestamp = start*1e9
+        timestamp = int(timestamp)
+        data_to_send = {
+        "id": 0,
+        "timestamp": timestamp,
+        "event": "start_experiment",
+        "value": "0",
+        }
+        sendpack(data_to_send)
+        evlen=0
+        
     # Iterate through the events
     for ii, trial in trials.iterrows():
 
@@ -80,7 +104,26 @@ def present(
             else:
                 marker = additional_labels["labels"][iteratorthing - 1]
             eeg.push_sample(marker=marker, timestamp=timestamp)
-
+        
+        if kernel:
+            if trial['sound_ind']==0:
+              dev_v_st = "event_deviant"
+            if trial['sound_ind']==1:
+              dev_v_st = "event_standard"
+            timestamp = time()*1e9
+            timestamp = int(timestamp)
+            data_to_send = {
+            "id": ii+1,
+            "timestamp": timestamp,
+            "event": dev_v_st,
+            "value":"1",
+            }
+            sendpack(data_to_send)
+            if len(event.getKeys()) > 0 or (time.time() - start) > record_duration:
+                break
+            event.clearEvents()
+            evlen += 1            
+            
         mywin.flip()
         if len(event.getKeys()) > 0:
             break
@@ -97,7 +140,17 @@ def present(
         eeg.stop()
 
     mywin.close()
-
+    
+    if kernel:
+        timestamp = time()*1e9
+        timestamp = int(timestamp)
+        data_to_send = {
+        "id": evlen+2,
+        "timestamp": timestamp,
+        "event": "end_experiment",
+        "value": "2",
+        }
+        sendpack(data_to_send)
 
 def show_instructions(duration):
 
