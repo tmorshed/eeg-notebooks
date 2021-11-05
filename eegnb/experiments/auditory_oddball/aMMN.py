@@ -13,8 +13,7 @@ from eegnb import generate_save_fn
 
 prefs.resetPrefs()
 prefs.hardware['audioDriver'] = ["portaudio"]
-
-logging.console.setLevel(logging.CRITICAL)
+prefs.hardware['audioLib'] = ['PTB', 'pyo','pygame']
 
 def sendpack(data_to_send):
     event_to_send = json.dumps(data_to_send).encode("utf-8")
@@ -66,8 +65,7 @@ def present(
 
     show_instructions(10)
 
-    # Start EEG Stream, wait for signal to settle, and then pull 
-    for start point
+    # Start EEG Stream, wait for signal to settle, and then pull for start point
     start = time()
     
     if kernel:
@@ -119,9 +117,6 @@ def present(
             "value":"1",
             }
             sendpack(data_to_send)
-            if len(event.getKeys()) > 0 or (time.time() - start) > record_duration:
-                break
-            event.clearEvents()
             evlen += 1            
             
         mywin.flip()
@@ -145,7 +140,7 @@ def present(
         timestamp = time()*1e9
         timestamp = int(timestamp)
         data_to_send = {
-        "id": evlen+2,
+        "id": evlen+1,
         "timestamp": timestamp,
         "event": "end_experiment",
         "value": "2",
