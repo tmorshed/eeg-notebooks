@@ -55,7 +55,7 @@ def present(duration=120, eeg=None, kernel=None, save_fn=None):
             )
         eeg.start(save_fn, duration=record_duration + 5)
     
-     if kernel:
+    if kernel:
         timestamp = start*1e9
         timestamp = int(timestamp)
         data_to_send = {
