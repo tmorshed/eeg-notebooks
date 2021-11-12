@@ -15,10 +15,6 @@ from eegnb.stimuli import FACE_HOUSE
 
 __title__ = "Visual N170"
 
-prefs.resetPrefs()
-prefs.hardware['audioDriver'] = ["portaudio"]
-prefs.hardware['audioLib'] = ['PTB', 'pyo','pygame']
-
 def sendpack(data_to_send):
     event_to_send = json.dumps(data_to_send).encode("utf-8")
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -95,9 +91,9 @@ def present(duration=120, eeg=None, kernel=None, save_fn=None):
         
         if kernel:
             if trial['image_type']==0:
-              dev_v_st = "houses"
+              dev_v_st = "event_houses"
             if trial['image_type']==1:
-              dev_v_st = "faces"
+              dev_v_st = "event_faces"
             timestamp = time()*1e9
             timestamp = int(timestamp)
             data_to_send = {
