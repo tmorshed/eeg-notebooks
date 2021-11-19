@@ -10,7 +10,6 @@ import h5py
 import socket
 import json
 from eegnb import generate_save_fn
-import eegnb.devices.eeg as eeg
 
 
 prefs.resetPrefs()
@@ -53,17 +52,17 @@ def present(
         trials[col_name] = col_vec
 
     # Setup graphics
-    mywin = visual.Window(
-        [1920, 1080], monitor="testMonitor", units="deg", fullscr=True
-    )
-    fixation = visual.GratingStim(win=mywin, size=0.2, pos=[0, 0], sf=0, rgb=[1, 0, 0])
-    fixation.setAutoDraw(True)
-    mywin.flip()
+    # mywin = visual.Window(
+    #     [1920, 1080], monitor="testMonitor", units="deg", fullscr=True
+    # )
+    # fixation = visual.GratingStim(win=mywin, size=0.2, pos=[0, 0], sf=0, rgb=[1, 0, 0])
+    # fixation.setAutoDraw(True)
+    # mywin.flip()
     iteratorthing = 0
 
     # start the EEG stream, will delay 5 seconds to let signal settle
     if eeg:
-        eeg.start(save_fn, duration=record_duration)
+        EEG.start(save_fn, duration=record_duration)
 
     show_instructions(10)
 
@@ -98,12 +97,12 @@ def present(
         # Push sample
         if eeg:
             timestamp = time()
-            if eeg.backend == "muselsl":
+            if EEG.backend == "muselsl":
                 marker = [additional_labels["labels"][iteratorthing - 1]]
                 marker = list(map(int, marker))
             else:
                 marker = additional_labels["labels"][iteratorthing - 1]
-            eeg.push_sample(marker=marker, timestamp=timestamp)
+            EEG.push_sample(marker=marker, timestamp=timestamp)
         
         if kernel:
             if trial['sound_ind']==0:
@@ -134,7 +133,7 @@ def present(
 
     # Cleanup
     if eeg:
-        eeg.stop()
+        EEG.stop()
 
     mywin.close()
     
