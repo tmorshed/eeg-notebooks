@@ -54,9 +54,9 @@ def present(duration=120, eeg=None, kernel=None, save_fn=None):
                 f"No path for a save file was passed to the experiment. Saving data to {save_fn}"
             )
         eeg.start(save_fn, duration=record_duration + 5)
-    
+        
     if kernel:
-        timestamp = start*1e9
+        timestamp = time()*1e9
         timestamp = int(timestamp)
         data_to_send = {
         "id": 0,
