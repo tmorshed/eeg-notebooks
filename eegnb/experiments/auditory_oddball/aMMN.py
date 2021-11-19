@@ -10,6 +10,8 @@ import h5py
 import socket
 import json
 from eegnb import generate_save_fn
+import eegnb.devices.eeg as eeg
+
 
 prefs.resetPrefs()
 prefs.hardware['audioDriver'] = ["portaudio"]
